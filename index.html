@@ -91,9 +91,10 @@ function applyEd(){for(const x of ED){const L=x.list=='been'?'visited':'want_to_
 applyEd();
 function edit(x){ED.push(x);localStorage.setItem(LK,JSON.stringify(ED));applyEd();r1();r2();
  const pe=$('pend'),msg=t=>{if(pe)pe.insertAdjacentHTML('beforeend',` <span class="tag p">${e(t)}</span>`)};
- fetch(FS,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({_subject:'DINING EDIT',_template:'table',_captcha:'false',edit:JSON.stringify(x)})})
- .then(r=>r.ok?r.json():Promise.reject(r.status)).then(j=>{if(j.success===false||j.success==='false')throw 0;msg('Sent')})
- .catch(()=>msg('Could Not Send - Try Again'))}
+ const ac=new AbortController(),to=setTimeout(()=>ac.abort(),12000);
+ fetch(FS,{method:'POST',signal:ac.signal,headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({_subject:'DINING EDIT',_template:'table',_captcha:'false',edit:JSON.stringify(x)})})
+ .then(r=>r.ok?r.json():Promise.reject(r.status)).then(j=>{clearTimeout(to);if(j.success===false||j.success==='false')throw 0;msg('Sent')})
+ .catch(()=>{clearTimeout(to);msg('Could Not Send - Try Again')})}
 function del(list,n,c){if(confirm('Remove '+tc(n)+'?'))edit({action:'delete',list,name:n,city:c})}
 
 const ini=n=>tc(n).replace(/^the /i,'').split(/\s+/).filter(w=>/\w/.test(w)).slice(0,2).map(w=>w[0]).join('').toUpperCase();
